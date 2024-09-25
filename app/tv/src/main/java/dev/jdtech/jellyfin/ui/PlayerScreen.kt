@@ -59,7 +59,6 @@ import kotlin.time.Duration.Companion.milliseconds
 val speedTexts = listOf("0.5x", "0.75x", "1x", "1.25x", "1.5x", "1.75x", "2x", "3x")
 val speedNumbers = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 1.75f, 2f, 3f)
 
-
 @Destination<RootGraph>
 @Composable
 fun PlayerScreen(
@@ -130,11 +129,12 @@ fun PlayerScreen(
                 val index = result.value.index
 
                 if (index == -1) {
-                    viewModel.player.trackSelectionParameters = viewModel.player.trackSelectionParameters
-                        .buildUpon()
-                        .clearOverridesOfType(trackType)
-                        .setTrackTypeDisabled(trackType, true)
-                        .build()
+                    viewModel.player.trackSelectionParameters =
+                        viewModel.player.trackSelectionParameters
+                            .buildUpon()
+                            .clearOverridesOfType(trackType)
+                            .setTrackTypeDisabled(trackType, true)
+                            .build()
                 } else {
                     if (trackType == PLAYBACK_SPEED) {
                         viewModel.player.setPlaybackSpeed(speedNumbers[index])
@@ -146,7 +146,7 @@ fun PlayerScreen(
                                 .setOverrideForType(
                                     TrackSelectionOverride(
                                         viewModel.player.currentTracks.groups[index].mediaTrackGroup,
-                                        0
+                                        0,
                                     ),
                                 )
                                 .setTrackTypeDisabled(trackType, false)
@@ -211,7 +211,7 @@ fun PlayerScreen(
                     state = videoPlayerState,
                     focusRequester = focusRequester,
                     navigator = navigator,
-                    playbackSpeed = viewModel.playbackSpeed
+                    playbackSpeed = viewModel.playbackSpeed,
                 )
             },
         )
@@ -228,7 +228,7 @@ fun VideoPlayerControls(
     state: VideoPlayerState,
     focusRequester: FocusRequester,
     navigator: DestinationsNavigator,
-    playbackSpeed: Float
+    playbackSpeed: Float,
 ) {
     val onPlayPauseToggle = { shouldPlay: Boolean ->
         if (shouldPlay) {
@@ -266,7 +266,12 @@ fun VideoPlayerControls(
                     isPlaying = isPlaying,
                     onClick = {
                         val tracks = getTracks(player, C.TRACK_TYPE_AUDIO)
-                        navigator.navigate(VideoPlayerTrackSelectorDialogDestination(C.TRACK_TYPE_AUDIO, tracks))
+                        navigator.navigate(
+                            VideoPlayerTrackSelectorDialogDestination(
+                                C.TRACK_TYPE_AUDIO,
+                                tracks,
+                            )
+                        )
                     },
                 )
                 VideoPlayerMediaButton(
@@ -275,7 +280,12 @@ fun VideoPlayerControls(
                     isPlaying = isPlaying,
                     onClick = {
                         val tracks = getTracks(player, C.TRACK_TYPE_TEXT)
-                        navigator.navigate(VideoPlayerTrackSelectorDialogDestination(C.TRACK_TYPE_TEXT, tracks))
+                        navigator.navigate(
+                            VideoPlayerTrackSelectorDialogDestination(
+                                C.TRACK_TYPE_TEXT,
+                                tracks,
+                            )
+                        )
                     },
                 )
                 VideoPlayerMediaButton(
@@ -283,7 +293,7 @@ fun VideoPlayerControls(
                     state = state,
                     isPlaying = isPlaying,
                     onClick = {
-                        val tracks = getSpeed(player, playbackSpeed)
+                        val tracks = getSpeed(playbackSpeed)
                         navigator.navigate(
                             VideoPlayerTrackSelectorDialogDestination(
                                 PLAYBACK_SPEED,
@@ -342,10 +352,11 @@ private fun getTracks(player: Player, type: Int): Array<Track> {
     )
     return arrayOf(noneTrack) + tracks
 }
+
 @androidx.annotation.OptIn(UnstableApi::class)
-private fun getSpeed(player: Player, playbackSpeed: Float): Array<Track> {
+private fun getSpeed(playbackSpeed: Float): Array<Track> {
     val tracks = arrayListOf<Track>()
-    for (i in 0 until speedTexts.size) {
+    for (i in speedTexts.indices) {
         val track = Track(
             id = i,
             label = null,
@@ -356,5 +367,5 @@ private fun getSpeed(player: Player, playbackSpeed: Float): Array<Track> {
         )
         tracks.add(track)
     }
-    return tracks.toTypedArray();
+    return tracks.toTypedArray()
 }

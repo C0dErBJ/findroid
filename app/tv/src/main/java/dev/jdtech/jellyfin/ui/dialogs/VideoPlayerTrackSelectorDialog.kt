@@ -44,7 +44,9 @@ data class VideoPlayerTrackSelectorDialogResult(
     val trackType: @C.TrackType Int,
     val index: Int,
 ) : Parcelable
-const val PLAYBACK_SPEED = 2000;
+
+const val PLAYBACK_SPEED = 2000
+
 @Destination<RootGraph>(style = BaseDialogStyle::class)
 @Composable
 fun VideoPlayerTrackSelectorDialog(
@@ -55,7 +57,7 @@ fun VideoPlayerTrackSelectorDialog(
     val dialogTitle = when (trackType) {
         C.TRACK_TYPE_AUDIO -> PlayerVideoR.string.select_audio_track
         C.TRACK_TYPE_TEXT -> PlayerVideoR.string.select_subtile_track
-        PLAYBACK_SPEED-> PlayerVideoR.string.select_playback_speed
+        PLAYBACK_SPEED -> PlayerVideoR.string.select_playback_speed
         else -> CoreR.string.unknown_error
     }
     Surface {
@@ -74,7 +76,12 @@ fun VideoPlayerTrackSelectorDialog(
                 items(tracks) { track ->
                     Surface(
                         onClick = {
-                            resultNavigator.navigateBack(result = VideoPlayerTrackSelectorDialogResult(trackType, track.id))
+                            resultNavigator.navigateBack(
+                                result = VideoPlayerTrackSelectorDialogResult(
+                                    trackType,
+                                    track.id
+                                )
+                            )
                         },
                         enabled = track.supported,
                         shape = ClickableSurfaceDefaults.shape(shape = RoundedCornerShape(4.dp)),
