@@ -79,8 +79,8 @@ fun VideoPlayerTrackSelectorDialog(
                             resultNavigator.navigateBack(
                                 result = VideoPlayerTrackSelectorDialogResult(
                                     trackType,
-                                    track.id
-                                )
+                                    track.id,
+                                ),
                             )
                         },
                         enabled = track.supported,

@@ -270,7 +270,7 @@ fun VideoPlayerControls(
                             VideoPlayerTrackSelectorDialogDestination(
                                 C.TRACK_TYPE_AUDIO,
                                 tracks,
-                            )
+                            ),
                         )
                     },
                 )
@@ -284,7 +284,7 @@ fun VideoPlayerControls(
                             VideoPlayerTrackSelectorDialogDestination(
                                 C.TRACK_TYPE_TEXT,
                                 tracks,
-                            )
+                            ),
                         )
                     },
                 )
@@ -298,7 +298,7 @@ fun VideoPlayerControls(
                             VideoPlayerTrackSelectorDialogDestination(
                                 PLAYBACK_SPEED,
                                 tracks,
-                            )
+                            ),
                         )
                     },
                 )
