@@ -44,7 +44,7 @@ data class VideoPlayerTrackSelectorDialogResult(
     val trackType: @C.TrackType Int,
     val index: Int,
 ) : Parcelable
-
+const val PLAYBACK_SPEED = 2000;
 @Destination<RootGraph>(style = BaseDialogStyle::class)
 @Composable
 fun VideoPlayerTrackSelectorDialog(
@@ -55,6 +55,7 @@ fun VideoPlayerTrackSelectorDialog(
     val dialogTitle = when (trackType) {
         C.TRACK_TYPE_AUDIO -> PlayerVideoR.string.select_audio_track
         C.TRACK_TYPE_TEXT -> PlayerVideoR.string.select_subtile_track
+        PLAYBACK_SPEED-> PlayerVideoR.string.select_playback_speed
         else -> CoreR.string.unknown_error
     }
     Surface {

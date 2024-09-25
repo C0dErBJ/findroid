@@ -47,6 +47,7 @@ import dev.jdtech.jellyfin.ui.components.player.VideoPlayerOverlay
 import dev.jdtech.jellyfin.ui.components.player.VideoPlayerSeeker
 import dev.jdtech.jellyfin.ui.components.player.VideoPlayerState
 import dev.jdtech.jellyfin.ui.components.player.rememberVideoPlayerState
+import dev.jdtech.jellyfin.ui.dialogs.PLAYBACK_SPEED
 import dev.jdtech.jellyfin.ui.dialogs.VideoPlayerTrackSelectorDialogResult
 import dev.jdtech.jellyfin.ui.theme.spacings
 import dev.jdtech.jellyfin.utils.handleDPadKeyEvents
@@ -54,6 +55,10 @@ import dev.jdtech.jellyfin.viewmodels.PlayerActivityViewModel
 import kotlinx.coroutines.delay
 import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
+
+val speedTexts = listOf("0.5x", "0.75x", "1x", "1.25x", "1.5x", "1.75x", "2x", "3x")
+val speedNumbers = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 1.75f, 2f, 3f)
+
 
 @Destination<RootGraph>
 @Composable
@@ -131,13 +136,22 @@ fun PlayerScreen(
                         .setTrackTypeDisabled(trackType, true)
                         .build()
                 } else {
-                    viewModel.player.trackSelectionParameters = viewModel.player.trackSelectionParameters
-                        .buildUpon()
-                        .setOverrideForType(
-                            TrackSelectionOverride(viewModel.player.currentTracks.groups[index].mediaTrackGroup, 0),
-                        )
-                        .setTrackTypeDisabled(trackType, false)
-                        .build()
+                    if (trackType == PLAYBACK_SPEED) {
+                        viewModel.player.setPlaybackSpeed(speedNumbers[index])
+                        viewModel.playbackSpeed = speedNumbers[index]
+                    } else {
+                        viewModel.player.trackSelectionParameters =
+                            viewModel.player.trackSelectionParameters
+                                .buildUpon()
+                                .setOverrideForType(
+                                    TrackSelectionOverride(
+                                        viewModel.player.currentTracks.groups[index].mediaTrackGroup,
+                                        0
+                                    ),
+                                )
+                                .setTrackTypeDisabled(trackType, false)
+                                .build()
+                    }
                 }
             }
         }
@@ -197,6 +211,7 @@ fun PlayerScreen(
                     state = videoPlayerState,
                     focusRequester = focusRequester,
                     navigator = navigator,
+                    playbackSpeed = viewModel.playbackSpeed
                 )
             },
         )
@@ -213,6 +228,7 @@ fun VideoPlayerControls(
     state: VideoPlayerState,
     focusRequester: FocusRequester,
     navigator: DestinationsNavigator,
+    playbackSpeed: Float
 ) {
     val onPlayPauseToggle = { shouldPlay: Boolean ->
         if (shouldPlay) {
@@ -260,6 +276,20 @@ fun VideoPlayerControls(
                     onClick = {
                         val tracks = getTracks(player, C.TRACK_TYPE_TEXT)
                         navigator.navigate(VideoPlayerTrackSelectorDialogDestination(C.TRACK_TYPE_TEXT, tracks))
+                    },
+                )
+                VideoPlayerMediaButton(
+                    icon = painterResource(id = R.drawable.ic_gauge),
+                    state = state,
+                    isPlaying = isPlaying,
+                    onClick = {
+                        val tracks = getSpeed(player, playbackSpeed)
+                        navigator.navigate(
+                            VideoPlayerTrackSelectorDialogDestination(
+                                PLAYBACK_SPEED,
+                                tracks,
+                            )
+                        )
                     },
                 )
             }
@@ -311,4 +341,20 @@ private fun getTracks(player: Player, type: Int): Array<Track> {
         supported = true,
     )
     return arrayOf(noneTrack) + tracks
+}
+@androidx.annotation.OptIn(UnstableApi::class)
+private fun getSpeed(player: Player, playbackSpeed: Float): Array<Track> {
+    val tracks = arrayListOf<Track>()
+    for (i in 0 until speedTexts.size) {
+        val track = Track(
+            id = i,
+            label = null,
+            language = speedTexts[i],
+            codec = "",
+            selected = playbackSpeed == speedNumbers[i],
+            supported = true,
+        )
+        tracks.add(track)
+    }
+    return tracks.toTypedArray();
 }
