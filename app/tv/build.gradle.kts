@@ -21,7 +21,17 @@ android {
         versionCode = Versions.appCode
         versionName = Versions.appName
     }
-
+    applicationVariants.all {
+        val variant = this
+        variant.outputs
+            .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+            .forEach { output ->
+                if (variant.buildType.name == "release") {
+                    val outputFileName = "findroid-tv-v${variant.versionName}-${variant.flavorName}-${output.getFilter("ABI")}.apk"
+                    output.outputFileName = outputFileName
+                }
+            }
+    }
     buildTypes {
         named("debug") {
             applicationIdSuffix = ".debug"
