@@ -94,6 +94,7 @@ fun VideoPlayerSeeker(
                 progress = (contentProgress / contentDuration).toFloat(),
                 onSeek = onSeek,
                 state = state,
+                focusRequester = focusRequester,
             )
         }
     }

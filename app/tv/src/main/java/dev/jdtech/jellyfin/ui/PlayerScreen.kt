@@ -137,8 +137,7 @@ fun PlayerScreen(
                             .build()
                 } else {
                     if (trackType == PLAYBACK_SPEED) {
-                        viewModel.player.setPlaybackSpeed(speedNumbers[index])
-                        viewModel.playbackSpeed = speedNumbers[index]
+                        viewModel.selectSpeed(speedNumbers[index])
                     } else {
                         viewModel.player.trackSelectionParameters =
                             viewModel.player.trackSelectionParameters
@@ -312,10 +311,10 @@ private fun Modifier.dPadEvents(
     videoPlayerState: VideoPlayerState,
 ): Modifier = this.handleDPadKeyEvents(
     onLeft = {
-        exoPlayer.seekBack()
+        videoPlayerState.showControls(quickSeek = true)
     },
     onRight = {
-        exoPlayer.seekForward()
+        videoPlayerState.showControls(quickSeek = true)
     },
     onUp = {
         videoPlayerState.showControls()

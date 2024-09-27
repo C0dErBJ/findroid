@@ -19,6 +19,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -35,6 +37,7 @@ fun VideoPlayerSeekBar(
     progress: Float,
     onSeek: (seekProgress: Float) -> Unit,
     state: VideoPlayerState,
+    focusRequester: FocusRequester,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     var isSelected by remember { mutableStateOf(false) }
@@ -56,6 +59,13 @@ fun VideoPlayerSeekBar(
         if (isSelected) {
             state.showControls(seconds = Int.MAX_VALUE)
         }
+        if (state.quickSeekMode) {
+            if (!isSelected) {
+                focusRequester.requestFocus()
+                seekProgress = progress
+                isSelected = !isSelected
+            }
+        }
     }
 
     Canvas(
@@ -63,6 +73,7 @@ fun VideoPlayerSeekBar(
             .fillMaxWidth()
             .height(animatedHeight)
             .padding(horizontal = 4.dp)
+            .focusRequester(focusRequester)
             .handleDPadKeyEvents(
                 onEnter = {
                     if (isSelected) {
@@ -127,6 +138,7 @@ fun VideoPlayerSeekBarPreview() {
             progress = 0.4f,
             onSeek = {},
             state = rememberVideoPlayerState(),
+            focusRequester = FocusRequester(),
         )
     }
 }
