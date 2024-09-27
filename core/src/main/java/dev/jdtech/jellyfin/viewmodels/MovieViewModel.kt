@@ -1,6 +1,7 @@
 package dev.jdtech.jellyfin.viewmodels
 
 import android.app.DownloadManager
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.ViewModel
@@ -10,6 +11,7 @@ import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.models.AudioChannel
 import dev.jdtech.jellyfin.models.AudioCodec
 import dev.jdtech.jellyfin.models.DisplayProfile
+import dev.jdtech.jellyfin.models.FindroidImages
 import dev.jdtech.jellyfin.models.FindroidMediaStream
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.FindroidSourceType
@@ -27,13 +29,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jellyfin.sdk.model.UUID
 import org.jellyfin.sdk.model.api.BaseItemPerson
+import org.jellyfin.sdk.model.api.ImageType
 import org.jellyfin.sdk.model.api.MediaStream
 import org.jellyfin.sdk.model.api.MediaStreamType
 import org.jellyfin.sdk.model.api.PersonKind
 import org.jellyfin.sdk.model.api.VideoRangeType
 import java.io.File
-import java.util.UUID
 import javax.inject.Inject
 import kotlin.random.Random
 
@@ -62,6 +65,7 @@ constructor(
             val actors: List<BaseItemPerson>,
             val director: BaseItemPerson?,
             val writers: List<BaseItemPerson>,
+            var personImages: Map<UUID, FindroidImages>,
             val videoMetadata: VideoMetadata,
             val writersString: String,
             val genresString: String,
@@ -99,6 +103,7 @@ constructor(
                     getActors(item),
                     getDirector(item),
                     writers,
+                    getPersonImage(item),
                     parseVideoMetadata(item),
                     writersString,
                     item.genres.joinToString(separator = ", "),
@@ -124,6 +129,21 @@ constructor(
             actors = item.people.filter { it.type == PersonKind.ACTOR }
         }
         return actors
+    }
+
+    private fun getPersonImage(item: FindroidMovie): Map<UUID, FindroidImages> {
+        val baseUrl = Uri.parse(repository.getBaseUrl())
+        val map = mutableMapOf<UUID, FindroidImages>()
+        item.people.forEach {
+            val primary = baseUrl.buildUpon()
+                .appendEncodedPath("items/${it.id}/Images/${ImageType.PRIMARY}")
+                .appendQueryParameter("tag", it.primaryImageTag)
+                .build()
+            map[it.id] = FindroidImages(
+                primary = primary
+            )
+        }
+        return map
     }
 
     private suspend fun getDirector(item: FindroidMovie): BaseItemPerson? {
@@ -283,6 +303,7 @@ constructor(
                         updateUiPlayedState(originalPlayedState)
                     }
                 }
+
                 true -> {
                     try {
                         repository.markAsPlayed(item.id)
@@ -319,6 +340,7 @@ constructor(
                         updateUiFavoriteState(originalFavoriteState)
                     }
                 }
+
                 true -> {
                     try {
                         repository.markAsFavorite(item.id)
@@ -363,7 +385,9 @@ constructor(
 
     fun cancelDownload() {
         viewModelScope.launch {
-            downloader.cancelDownload(item, item.sources.first { it.type == FindroidSourceType.LOCAL })
+            downloader.cancelDownload(
+                item,
+                item.sources.first { it.type == FindroidSourceType.LOCAL })
             loadData(item.id)
         }
     }

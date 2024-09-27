@@ -14,6 +14,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -51,8 +55,12 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.jdtech.jellyfin.models.AudioChannel
 import dev.jdtech.jellyfin.models.AudioCodec
 import dev.jdtech.jellyfin.models.DisplayProfile
+import dev.jdtech.jellyfin.models.FindroidImages
+import dev.jdtech.jellyfin.models.FindroidPerson
 import dev.jdtech.jellyfin.models.Resolution
 import dev.jdtech.jellyfin.models.VideoMetadata
+import dev.jdtech.jellyfin.ui.components.Direction
+import dev.jdtech.jellyfin.ui.components.ItemCard
 import dev.jdtech.jellyfin.ui.dummy.dummyMovie
 import dev.jdtech.jellyfin.ui.theme.FindroidTheme
 import dev.jdtech.jellyfin.ui.theme.Yellow
@@ -144,8 +152,7 @@ private fun MovieScreenLayout(
                     model = item.images.backdrop,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize(),
+                    modifier = Modifier.fillMaxSize(),
                 )
                 if (size != Size.Zero) {
                     Box(
@@ -161,8 +168,12 @@ private fun MovieScreenLayout(
                     )
                 }
                 Column(
-                    modifier = Modifier
-                        .padding(start = MaterialTheme.spacings.default * 2, end = MaterialTheme.spacings.default * 2),
+                    modifier = Modifier.padding(
+                        start = MaterialTheme.spacings.default * 2,
+                        end = MaterialTheme.spacings.default * 2,
+                        top = MaterialTheme.spacings.default
+                    ) .verticalScroll(rememberScrollState()),
+
                 ) {
                     Spacer(modifier = Modifier.height(112.dp))
                     Text(
@@ -317,13 +328,33 @@ private fun MovieScreenLayout(
                             )
                         }
                     }
-//                    Spacer(modifier = Modifier.height(MaterialTheme.spacings.large))
-//                    Text(
-//                        text = stringResource(id = CoreR.string.cast_amp_crew),
-//                        style = MaterialTheme.typography.headlineMedium,
-//                    )
+                    Spacer(modifier = Modifier.height(MaterialTheme.spacings.large))
+                    Text(
+                        text = stringResource(id = CoreR.string.cast_amp_crew),
+                        style = MaterialTheme.typography.headlineMedium,
+                    )
+                    Spacer(modifier = Modifier.height(MaterialTheme.spacings.default))
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
+                    ) {
+                        items(uiState.actors) { it ->
+                            ItemCard(
+                                item = FindroidPerson(
+                                    id = it.id,
+                                    name = it.name ?: "",
+                                    type = it.type,
+                                    images = uiState.personImages[it.id] ?: FindroidImages() ,
+                                ),
+                                direction = Direction.VERTICAL,
+                                onClick = {
+                                },
+                            )
+                        }
+                    }
                 }
             }
+
+
 
             LaunchedEffect(true) {
                 focusRequester.requestFocus()
@@ -362,6 +393,7 @@ private fun MovieScreenLayoutPreview() {
                 subtitleString = "",
                 runTime = "121 min",
                 dateString = "2019",
+                personImages = emptyMap()
             ),
             onPlayClick = {},
             onTrailerClick = {},

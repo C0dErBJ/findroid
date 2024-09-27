@@ -367,8 +367,8 @@ private fun getSpeed(playbackSpeed: Float): Array<Track> {
         val track = Track(
             id = i,
             label = null,
-            language = speedTexts[i],
-            codec = "",
+            language = (i + 1).toString(),
+            codec = speedTexts[i],
             selected = playbackSpeed == speedNumbers[i],
             supported = true,
         )
