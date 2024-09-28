@@ -80,24 +80,25 @@ fun PlayerScreen(
     }
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            lifecycle = event
+        val observer =
+            LifecycleEventObserver { _, event ->
+                lifecycle = event
 
-            // Handle creation and release of media session
-            when (lifecycle) {
-                Lifecycle.Event.ON_STOP -> {
-                    println("ON_STOP")
-                    mediaSession?.release()
+                // Handle creation and release of media session
+                when (lifecycle) {
+                    Lifecycle.Event.ON_STOP -> {
+                        println("ON_STOP")
+                        mediaSession?.release()
+                    }
+
+                    Lifecycle.Event.ON_START -> {
+                        println("ON_START")
+                        mediaSession = MediaSession.Builder(context, viewModel.player).build()
+                    }
+
+                    else -> {}
                 }
-
-                Lifecycle.Event.ON_START -> {
-                    println("ON_START")
-                    mediaSession = MediaSession.Builder(context, viewModel.player).build()
-                }
-
-                else -> {}
             }
-        }
         lifecycleOwner.lifecycle.addObserver(observer)
 
         onDispose {
@@ -144,11 +145,11 @@ fun PlayerScreen(
                                 .buildUpon()
                                 .setOverrideForType(
                                     TrackSelectionOverride(
-                                        viewModel.player.currentTracks.groups[index].mediaTrackGroup,
+                                        viewModel.player.currentTracks.groups[index]
+                                            .mediaTrackGroup,
                                         0,
                                     ),
-                                )
-                                .setTrackTypeDisabled(trackType, false)
+                                ).setTrackTypeDisabled(trackType, false)
                                 .build()
                     }
                 }
@@ -157,12 +158,12 @@ fun PlayerScreen(
     }
 
     Box(
-        modifier = Modifier
-            .dPadEvents(
-                exoPlayer = viewModel.player,
-                videoPlayerState = videoPlayerState,
-            )
-            .focusable(),
+        modifier =
+            Modifier
+                .dPadEvents(
+                    exoPlayer = viewModel.player,
+                    videoPlayerState = videoPlayerState,
+                ).focusable(),
     ) {
         AndroidView(
             factory = { context ->
@@ -192,8 +193,9 @@ fun PlayerScreen(
                     else -> Unit
                 }
             },
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier =
+                Modifier
+                    .fillMaxSize(),
         )
         val focusRequester = remember { FocusRequester() }
         VideoPlayerOverlay(
@@ -309,54 +311,60 @@ fun VideoPlayerControls(
 private fun Modifier.dPadEvents(
     exoPlayer: Player,
     videoPlayerState: VideoPlayerState,
-): Modifier = this.handleDPadKeyEvents(
-    onLeft = {
-        videoPlayerState.showControls(quickSeek = true)
-    },
-    onRight = {
-        videoPlayerState.showControls(quickSeek = true)
-    },
-    onUp = {
-        videoPlayerState.showControls()
-    },
-    onDown = {
-        videoPlayerState.showControls()
-    },
-    onEnter = {
-        exoPlayer.pause()
-        videoPlayerState.showControls()
-    },
-)
+): Modifier =
+    this.handleDPadKeyEvents(
+        onLeft = {
+            videoPlayerState.showControls(quickSeek = true)
+        },
+        onRight = {
+            videoPlayerState.showControls(quickSeek = true)
+        },
+        onUp = {
+            videoPlayerState.showControls()
+        },
+        onDown = {
+            videoPlayerState.showControls()
+        },
+        onEnter = {
+            exoPlayer.pause()
+            videoPlayerState.showControls()
+        },
+    )
 
 @androidx.annotation.OptIn(UnstableApi::class)
-private fun getTracks(player: Player, type: Int): Array<Track> {
+private fun getTracks(
+    player: Player,
+    type: Int,
+): Array<Track> {
     val tracks = arrayListOf<Track>()
     for (groupIndex in 0 until player.currentTracks.groups.count()) {
         val group = player.currentTracks.groups[groupIndex]
         if (group.type == type) {
             val format = group.mediaTrackGroup.getFormat(0)
 
-            val track = Track(
-                id = groupIndex,
-                label = format.label,
-                language = Locale(format.language.toString()).displayLanguage,
-                codec = format.codecs,
-                selected = group.isSelected,
-                supported = group.isSupported,
-            )
+            val track =
+                Track(
+                    id = groupIndex,
+                    label = format.label,
+                    language = Locale(format.language.toString()).displayLanguage,
+                    codec = format.codecs,
+                    selected = group.isSelected,
+                    supported = group.isSupported,
+                )
 
             tracks.add(track)
         }
     }
 
-    val noneTrack = Track(
-        id = -1,
-        label = null,
-        language = null,
-        codec = null,
-        selected = !tracks.any { it.selected },
-        supported = true,
-    )
+    val noneTrack =
+        Track(
+            id = -1,
+            label = null,
+            language = null,
+            codec = null,
+            selected = !tracks.any { it.selected },
+            supported = true,
+        )
     return arrayOf(noneTrack) + tracks
 }
 
@@ -364,14 +372,15 @@ private fun getTracks(player: Player, type: Int): Array<Track> {
 private fun getSpeed(playbackSpeed: Float): Array<Track> {
     val tracks = arrayListOf<Track>()
     for (i in speedTexts.indices) {
-        val track = Track(
-            id = i,
-            label = null,
-            language = (i + 1).toString(),
-            codec = speedTexts[i],
-            selected = playbackSpeed == speedNumbers[i],
-            supported = true,
-        )
+        val track =
+            Track(
+                id = i,
+                label = null,
+                language = speedTexts[i],
+                codec = "",
+                selected = playbackSpeed == speedNumbers[i],
+                supported = true,
+            )
         tracks.add(track)
     }
     return tracks.toTypedArray()

@@ -65,7 +65,7 @@ constructor(
             val actors: List<BaseItemPerson>,
             val director: BaseItemPerson?,
             val writers: List<BaseItemPerson>,
-            var personImages: Map<UUID, FindroidImages>,
+            val personImages: Map<UUID, FindroidImages>,
             val videoMetadata: VideoMetadata,
             val writersString: String,
             val genresString: String,

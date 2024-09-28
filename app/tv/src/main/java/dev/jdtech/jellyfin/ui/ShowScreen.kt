@@ -59,6 +59,8 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.PlayerActivityDestination
 import com.ramcosta.composedestinations.generated.destinations.SeasonScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.jdtech.jellyfin.models.FindroidImages
+import dev.jdtech.jellyfin.models.FindroidPerson
 import dev.jdtech.jellyfin.models.FindroidSeason
 import dev.jdtech.jellyfin.ui.components.Direction
 import dev.jdtech.jellyfin.ui.components.ItemCard
@@ -138,7 +140,7 @@ private fun ShowScreenLayout(
     val focusRequester = remember { FocusRequester() }
 
     val listState = rememberLazyListState()
-    val listSize = remember { mutableIntStateOf(2) }
+    val listSize = remember { mutableIntStateOf(3) }
     var currentIndex by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(currentIndex) {
@@ -380,6 +382,42 @@ private fun ShowScreenLayout(
                             }
                         }
                     }
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .padding(
+                                    start = MaterialTheme.spacings.default * 2,
+                                    end = MaterialTheme.spacings.default * 2,
+                                ),
+                        ){
+                            Spacer(modifier = Modifier.height(MaterialTheme.spacings.large))
+                            Text(
+                                text = stringResource(id = CoreR.string.cast_amp_crew),
+                                style = MaterialTheme.typography.headlineMedium,
+                            )
+                        }
+
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
+                            contentPadding = PaddingValues(horizontal = MaterialTheme.spacings.default * 2),
+                        ) {
+
+                            items(uiState.actors) { it ->
+                                ItemCard(
+                                    item = FindroidPerson(
+                                        id = it.id,
+                                        name = it.name ?: "",
+                                        type = it.type,
+                                        images = uiState.personImages[it.id]
+                                            ?: FindroidImages(),
+                                    ),
+                                    direction = Direction.VERTICAL,
+                                    onClick = {
+                                    },
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
@@ -408,6 +446,7 @@ private fun ShowScreenLayoutPreview() {
                 dateString = "2013 - 2023",
                 nextUp = null,
                 seasons = emptyList(),
+                personImages = emptyMap(),
             ),
             onPlayClick = {},
             onTrailerClick = {},
