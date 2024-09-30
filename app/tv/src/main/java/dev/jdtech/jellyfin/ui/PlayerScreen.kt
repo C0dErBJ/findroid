@@ -51,6 +51,7 @@ import dev.jdtech.jellyfin.ui.dialogs.PLAYBACK_SPEED
 import dev.jdtech.jellyfin.ui.dialogs.VideoPlayerTrackSelectorDialogResult
 import dev.jdtech.jellyfin.ui.theme.spacings
 import dev.jdtech.jellyfin.utils.handleDPadKeyEvents
+import dev.jdtech.jellyfin.utils.handleMenuKeyEvents
 import dev.jdtech.jellyfin.viewmodels.PlayerActivityViewModel
 import kotlinx.coroutines.delay
 import java.util.Locale
@@ -312,24 +313,29 @@ private fun Modifier.dPadEvents(
     exoPlayer: Player,
     videoPlayerState: VideoPlayerState,
 ): Modifier =
-    this.handleDPadKeyEvents(
-        onLeft = {
-            videoPlayerState.showControls(quickSeek = true)
-        },
-        onRight = {
-            videoPlayerState.showControls(quickSeek = true)
-        },
-        onUp = {
-            videoPlayerState.showControls()
-        },
-        onDown = {
-            videoPlayerState.showControls()
-        },
-        onEnter = {
-            exoPlayer.pause()
-            videoPlayerState.showControls()
-        },
-    )
+    this
+        .handleDPadKeyEvents(
+            onLeft = {
+                videoPlayerState.quickSeek(Int.MAX_VALUE)
+            },
+            onRight = {
+                videoPlayerState.quickSeek(Int.MAX_VALUE)
+            },
+            onUp = {
+                videoPlayerState.showControls()
+            },
+            onDown = {
+                videoPlayerState.showControls()
+            },
+            onEnter = {
+                exoPlayer.pause()
+                videoPlayerState.showControls()
+            },
+        ).handleMenuKeyEvents(
+            onMenu = {
+                videoPlayerState.showControls()
+            },
+        )
 
 @androidx.annotation.OptIn(UnstableApi::class)
 private fun getTracks(

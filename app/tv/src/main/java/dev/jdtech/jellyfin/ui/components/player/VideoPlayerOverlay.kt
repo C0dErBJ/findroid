@@ -57,16 +57,17 @@ fun VideoPlayerOverlay(
             contentAlignment = Alignment.BottomCenter,
         ) {
             Spacer(
-                modifier = modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                Color.Black.copy(alpha = 0.4f),
-                                Color.Black.copy(alpha = 0.8f),
+                modifier =
+                    modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    Color.Black.copy(alpha = 0.4f),
+                                    Color.Black.copy(alpha = 0.8f),
+                                ),
                             ),
                         ),
-                    ),
             )
 
             Column(

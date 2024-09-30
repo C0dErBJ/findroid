@@ -20,12 +20,17 @@ class VideoPlayerState internal constructor(
     private var _controlsVisible by mutableStateOf(true)
     val controlsVisible get() = _controlsVisible
 
-    private var _quickSeekMode by mutableStateOf(false)
-    val quickSeekMode get() = _quickSeekMode
+    private var _qucikSeekMode by mutableStateOf(false)
+    val qucikSeekMode get() = _qucikSeekMode
 
-    fun showControls(seconds: Int = hideSeconds, quickSeek: Boolean = false) {
+    fun showControls(seconds: Int = hideSeconds) {
         _controlsVisible = true
-        _quickSeekMode = quickSeek
+        channel.trySend(seconds)
+    }
+
+    fun quickSeek(seconds: Int = hideSeconds) {
+        _qucikSeekMode = true
+        _controlsVisible = true
         channel.trySend(seconds)
     }
 
@@ -33,20 +38,21 @@ class VideoPlayerState internal constructor(
 
     @OptIn(FlowPreview::class)
     suspend fun observe() {
-        channel.consumeAsFlow()
+        channel
+            .consumeAsFlow()
             .debounce { it.toLong() * 1000 }
             .collect {
                 _controlsVisible = false
-                _quickSeekMode = false
+                _qucikSeekMode = false
             }
     }
 }
 
 @Composable
-fun rememberVideoPlayerState(@IntRange(from = 0) hideSeconds: Int = 2) =
-    remember {
-        VideoPlayerState(hideSeconds = hideSeconds)
-    }
-        .also {
-            LaunchedEffect(it) { it.observe() }
-        }
+fun rememberVideoPlayerState(
+    @IntRange(from = 0) hideSeconds: Int = 2,
+) = remember {
+    VideoPlayerState(hideSeconds = hideSeconds)
+}.also {
+    LaunchedEffect(it) { it.observe() }
+}

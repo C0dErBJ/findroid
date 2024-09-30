@@ -123,7 +123,14 @@ fun ShowScreen(
             showViewModel.toggleFavorite()
         },
         onSeasonClick = { season ->
-            navigator.navigate(SeasonScreenDestination(seriesId = season.seriesId, seasonId = season.id, seriesName = season.seriesName, seasonName = season.name))
+            navigator.navigate(
+                SeasonScreenDestination(
+                    seriesId = season.seriesId,
+                    seasonId = season.id,
+                    seriesName = season.seriesName,
+                    seasonName = season.name,
+                ),
+            )
         },
     )
 }
@@ -156,30 +163,33 @@ private fun ShowScreenLayout(
                 mutableStateOf(Size.Zero)
             }
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .onGloballyPositioned { coordinates ->
-                        size = coordinates.size.toSize()
-                    },
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .onGloballyPositioned { coordinates ->
+                            size = coordinates.size.toSize()
+                        },
             ) {
                 AsyncImage(
                     model = item.images.backdrop,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize(),
+                    modifier =
+                        Modifier
+                            .fillMaxSize(),
                 )
                 if (size != Size.Zero) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.radialGradient(
-                                    listOf(Color.Black.copy(alpha = .2f), Color.Black),
-                                    center = Offset(size.width, 0f),
-                                    radius = size.width * .8f,
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .background(
+                                    Brush.radialGradient(
+                                        listOf(Color.Black.copy(alpha = .2f), Color.Black),
+                                        center = Offset(size.width, 0f),
+                                        radius = size.width * .8f,
+                                    ),
                                 ),
-                            ),
                     )
                 }
                 LazyColumn(
@@ -187,25 +197,27 @@ private fun ShowScreenLayout(
                     contentPadding = PaddingValues(top = 112.dp, bottom = MaterialTheme.spacings.large),
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
                     userScrollEnabled = false,
-                    modifier = Modifier.onPreviewKeyEvent { keyEvent ->
-                        when (keyEvent.key.nativeKeyCode) {
-                            KeyEvent.KEYCODE_DPAD_DOWN -> {
-                                currentIndex = (++currentIndex).coerceIn(0, listSize.intValue - 1)
+                    modifier =
+                        Modifier.onPreviewKeyEvent { keyEvent ->
+                            when (keyEvent.key.nativeKeyCode) {
+                                KeyEvent.KEYCODE_DPAD_DOWN -> {
+                                    currentIndex = (++currentIndex).coerceIn(0, listSize.intValue - 1)
+                                }
+                                KeyEvent.KEYCODE_DPAD_UP -> {
+                                    currentIndex = (--currentIndex).coerceIn(0, listSize.intValue - 1)
+                                }
                             }
-                            KeyEvent.KEYCODE_DPAD_UP -> {
-                                currentIndex = (--currentIndex).coerceIn(0, listSize.intValue - 1)
-                            }
-                        }
-                        false
-                    },
+                            false
+                        },
                 ) {
                     item {
                         Column(
-                            modifier = Modifier
-                                .padding(
-                                    start = MaterialTheme.spacings.default * 2,
-                                    end = MaterialTheme.spacings.default * 2,
-                                ),
+                            modifier =
+                                Modifier
+                                    .padding(
+                                        start = MaterialTheme.spacings.default * 2,
+                                        end = MaterialTheme.spacings.default * 2,
+                                    ),
                         ) {
                             Text(
                                 text = item.name,
@@ -303,7 +315,12 @@ private fun ShowScreenLayout(
                                         tint = if (item.played) Color.Red else LocalContentColor.current,
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text(text = stringResource(id = if (item.played) CoreR.string.unmark_as_played else CoreR.string.mark_as_played))
+                                    Text(
+                                        text =
+                                            stringResource(
+                                                id = if (item.played) CoreR.string.unmark_as_played else CoreR.string.mark_as_played,
+                                            ),
+                                    )
                                 }
                                 Button(
                                     onClick = {
@@ -311,12 +328,20 @@ private fun ShowScreenLayout(
                                     },
                                 ) {
                                     Icon(
-                                        painter = painterResource(id = if (item.favorite) CoreR.drawable.ic_heart_filled else CoreR.drawable.ic_heart),
+                                        painter =
+                                            painterResource(
+                                                id = if (item.favorite) CoreR.drawable.ic_heart_filled else CoreR.drawable.ic_heart,
+                                            ),
                                         contentDescription = null,
                                         tint = if (item.favorite) Color.Red else LocalContentColor.current,
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text(text = stringResource(id = if (item.favorite) CoreR.string.remove_from_favorites else CoreR.string.add_to_favorites))
+                                    Text(
+                                        text =
+                                            stringResource(
+                                                id = if (item.favorite) CoreR.string.remove_from_favorites else CoreR.string.add_to_favorites,
+                                            ),
+                                    )
                                 }
                             }
                             Spacer(modifier = Modifier.height(MaterialTheme.spacings.default))
@@ -384,33 +409,35 @@ private fun ShowScreenLayout(
                     }
                     item {
                         Column(
-                            modifier = Modifier
-                                .padding(
-                                    start = MaterialTheme.spacings.default * 2,
-                                    end = MaterialTheme.spacings.default * 2,
-                                ),
-                        ){
+                            modifier =
+                                Modifier
+                                    .padding(
+                                        start = MaterialTheme.spacings.default * 2,
+                                        end = MaterialTheme.spacings.default * 2,
+                                    ),
+                        ) {
                             Spacer(modifier = Modifier.height(MaterialTheme.spacings.large))
                             Text(
                                 text = stringResource(id = CoreR.string.cast_amp_crew),
                                 style = MaterialTheme.typography.headlineMedium,
                             )
                         }
-
+                        Spacer(modifier = Modifier.height(MaterialTheme.spacings.default))
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
                             contentPadding = PaddingValues(horizontal = MaterialTheme.spacings.default * 2),
                         ) {
-
                             items(uiState.actors) { it ->
                                 ItemCard(
-                                    item = FindroidPerson(
-                                        id = it.id,
-                                        name = it.name ?: "",
-                                        type = it.type,
-                                        images = uiState.personImages[it.id]
-                                            ?: FindroidImages(),
-                                    ),
+                                    item =
+                                        FindroidPerson(
+                                            id = it.id,
+                                            name = it.name ?: "",
+                                            type = it.type,
+                                            images =
+                                                uiState.personImages[it.id]
+                                                    ?: FindroidImages(),
+                                        ),
                                     direction = Direction.VERTICAL,
                                     onClick = {
                                     },
@@ -435,19 +462,20 @@ private fun ShowScreenLayout(
 private fun ShowScreenLayoutPreview() {
     FindroidTheme {
         ShowScreenLayout(
-            uiState = ShowViewModel.UiState.Normal(
-                item = dummyShow,
-                actors = emptyList(),
-                director = null,
-                writers = emptyList(),
-                writersString = "Hiroshi Seko, Hajime Isayama",
-                genresString = "Action, Science Fiction, Adventure",
-                runTime = "0 min",
-                dateString = "2013 - 2023",
-                nextUp = null,
-                seasons = emptyList(),
-                personImages = emptyMap(),
-            ),
+            uiState =
+                ShowViewModel.UiState.Normal(
+                    item = dummyShow,
+                    actors = emptyList(),
+                    director = null,
+                    writers = emptyList(),
+                    writersString = "Hiroshi Seko, Hajime Isayama",
+                    genresString = "Action, Science Fiction, Adventure",
+                    runTime = "0 min",
+                    dateString = "2013 - 2023",
+                    nextUp = null,
+                    seasons = emptyList(),
+                    personImages = emptyMap(),
+                ),
             onPlayClick = {},
             onTrailerClick = {},
             onPlayedClick = {},

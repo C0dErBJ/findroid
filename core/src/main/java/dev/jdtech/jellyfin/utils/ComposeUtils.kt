@@ -12,7 +12,10 @@ import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.flow.Flow
 
 @Composable
-fun <T> ObserveAsEvents(flow: Flow<T>, onEvent: (T) -> Unit) {
+fun <T> ObserveAsEvents(
+    flow: Flow<T>,
+    onEvent: (T) -> Unit,
+) {
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(flow, lifecycleOwner.lifecycle) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -21,19 +24,20 @@ fun <T> ObserveAsEvents(flow: Flow<T>, onEvent: (T) -> Unit) {
     }
 }
 
-private val DPadEventsKeyCodes = listOf(
-    KeyEvent.KEYCODE_DPAD_LEFT,
-    KeyEvent.KEYCODE_SYSTEM_NAVIGATION_LEFT,
-    KeyEvent.KEYCODE_DPAD_RIGHT,
-    KeyEvent.KEYCODE_SYSTEM_NAVIGATION_RIGHT,
-    KeyEvent.KEYCODE_DPAD_UP,
-    KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP,
-    KeyEvent.KEYCODE_DPAD_DOWN,
-    KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN,
-    KeyEvent.KEYCODE_DPAD_CENTER,
-    KeyEvent.KEYCODE_ENTER,
-    KeyEvent.KEYCODE_NUMPAD_ENTER,
-)
+private val DPadEventsKeyCodes =
+    listOf(
+        KeyEvent.KEYCODE_DPAD_LEFT,
+        KeyEvent.KEYCODE_SYSTEM_NAVIGATION_LEFT,
+        KeyEvent.KEYCODE_DPAD_RIGHT,
+        KeyEvent.KEYCODE_SYSTEM_NAVIGATION_RIGHT,
+        KeyEvent.KEYCODE_DPAD_UP,
+        KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP,
+        KeyEvent.KEYCODE_DPAD_DOWN,
+        KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN,
+        KeyEvent.KEYCODE_DPAD_CENTER,
+        KeyEvent.KEYCODE_ENTER,
+        KeyEvent.KEYCODE_NUMPAD_ENTER,
+    )
 
 /**
  * Handles horizontal (Left & Right) D-Pad Keys and consumes the event(s) so that the focus doesn't
@@ -56,12 +60,14 @@ fun Modifier.handleDPadKeyEvents(
                     return@onPreviewKeyEvent true
                 }
             }
+
             KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_SYSTEM_NAVIGATION_RIGHT -> {
                 onRight?.apply {
                     onActionUp(::invoke)
                     return@onPreviewKeyEvent true
                 }
             }
+
             KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER -> {
                 onEnter?.apply {
                     onActionUp(::invoke)
@@ -88,18 +94,38 @@ fun Modifier.handleDPadKeyEvents(
             KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_SYSTEM_NAVIGATION_LEFT -> {
                 onLeft?.invoke().also { return@onKeyEvent true }
             }
+
             KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_SYSTEM_NAVIGATION_RIGHT -> {
                 onRight?.invoke().also { return@onKeyEvent true }
             }
+
             KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP -> {
                 onUp?.invoke().also { return@onKeyEvent true }
             }
+
             KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN -> {
                 onDown?.invoke().also { return@onKeyEvent true }
             }
+
             KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER -> {
                 onEnter?.invoke().also { return@onKeyEvent true }
             }
+        }
+    }
+    false
+}
+
+fun Modifier.handleMenuKeyEvents(
+    onMenu: (() -> Unit)? = null,
+    onCancel: (() -> Unit)? = null,
+) = onKeyEvent {
+    when (it.nativeKeyEvent.keyCode) {
+        KeyEvent.KEYCODE_MENU -> {
+            onMenu?.invoke().also { return@onKeyEvent true }
+        }
+
+        KeyEvent.FLAG_CANCELED -> {
+            onMenu?.invoke().also { return@onKeyEvent true }
         }
     }
     false

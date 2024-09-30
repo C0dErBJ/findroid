@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -43,11 +44,12 @@ fun VideoPlayerSeekBar(
     var isSelected by remember { mutableStateOf(false) }
     val isFocused by interactionSource.collectIsFocusedAsState()
     val color by rememberUpdatedState(
-        newValue = if (isSelected) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.onSurface
-        },
+        newValue =
+            if (isSelected) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurface
+            },
     )
     val animatedHeight by animateDpAsState(
         targetValue = 8.dp.times(if (isFocused) 2f else 1f),
@@ -59,47 +61,58 @@ fun VideoPlayerSeekBar(
         if (isSelected) {
             state.showControls(seconds = Int.MAX_VALUE)
         }
-        if (state.quickSeekMode) {
+    }
+    LaunchedEffect(state.qucikSeekMode) {
+        if (state.qucikSeekMode) {
             if (!isSelected) {
                 focusRequester.requestFocus()
+                isSelected = true
                 seekProgress = progress
-                isSelected = !isSelected
             }
         }
     }
-
     Canvas(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(animatedHeight)
-            .padding(horizontal = 4.dp)
-            .focusRequester(focusRequester)
-            .handleDPadKeyEvents(
-                onEnter = {
-                    if (isSelected) {
-                        onSeek(seekProgress)
-                        focusManager.moveFocus(FocusDirection.Exit)
-                    } else {
-                        seekProgress = progress
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(animatedHeight)
+                .focusRequester(focusRequester)
+                .onFocusChanged {
+                    if (!it.isFocused) {
+                        // its weird behavior when move focus
+                        if (isSelected) {
+                            isSelected = false
+                        }
                     }
-                    isSelected = !isSelected
-                },
-                onLeft = {
-                    if (isSelected) {
-                        seekProgress = (seekProgress - 0.05f).coerceAtLeast(0f)
-                    } else {
-                        focusManager.moveFocus(FocusDirection.Left)
-                    }
-                },
-                onRight = {
-                    if (isSelected) {
-                        seekProgress = (seekProgress + 0.05f).coerceAtMost(1f)
-                    } else {
-                        focusManager.moveFocus(FocusDirection.Right)
-                    }
-                },
-            )
-            .focusable(interactionSource = interactionSource),
+                }.padding(horizontal = 4.dp)
+                .handleDPadKeyEvents(
+                    onEnter = {
+                        if (isSelected) {
+                            onSeek(seekProgress)
+                            isSelected = !isSelected
+                            focusManager.moveFocus(FocusDirection.Exit)
+                        } else {
+                            seekProgress = progress
+                            isSelected = true
+                        }
+                    },
+                    onLeft = {
+                        if (isSelected) {
+                            seekProgress = (seekProgress - 0.01f).coerceAtLeast(0f)
+                        }
+                        if (!isSelected || !state.qucikSeekMode) {
+                            focusManager.moveFocus(FocusDirection.Left)
+                        }
+                    },
+                    onRight = {
+                        if (isSelected) {
+                            seekProgress = (seekProgress + 0.01f).coerceAtMost(1f)
+                        }
+                        if (!isSelected || !state.qucikSeekMode) {
+                            focusManager.moveFocus(FocusDirection.Right)
+                        }
+                    },
+                ).focusable(interactionSource = interactionSource),
     ) {
         val yOffset = size.height.div(2)
         drawLine(
@@ -112,20 +125,22 @@ fun VideoPlayerSeekBar(
         drawLine(
             color = color,
             start = Offset(x = 0f, y = yOffset),
-            end = Offset(
-                x = size.width.times(if (isSelected) seekProgress else progress),
-                y = yOffset,
-            ),
+            end =
+                Offset(
+                    x = size.width.times(if (isSelected) seekProgress else progress),
+                    y = yOffset,
+                ),
             strokeWidth = size.height.div(2),
             cap = StrokeCap.Round,
         )
         drawCircle(
             color = Color.White,
             radius = size.height.div(2),
-            center = Offset(
-                x = size.width.times(if (isSelected) seekProgress else progress),
-                y = yOffset,
-            ),
+            center =
+                Offset(
+                    x = size.width.times(if (isSelected) seekProgress else progress),
+                    y = yOffset,
+                ),
         )
     }
 }

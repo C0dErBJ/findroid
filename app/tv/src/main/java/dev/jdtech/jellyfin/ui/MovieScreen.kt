@@ -388,6 +388,7 @@ private fun MovieScreenLayout(
                         }
                     }
                     item {
+                        Spacer(modifier = Modifier.height(MaterialTheme.spacings.default))
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
                             contentPadding = PaddingValues(horizontal = MaterialTheme.spacings.default * 2),
